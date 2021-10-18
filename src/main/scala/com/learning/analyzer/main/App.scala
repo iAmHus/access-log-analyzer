@@ -20,6 +20,8 @@ object App {
 
     try {
 
+      validateInputArgs(args)
+
       spark = Some(SparkSession.builder()
                                .appName("App Log Scanner")
                                .master("local")
@@ -34,7 +36,6 @@ object App {
 
       logger.info("Started and created a spark session")
 
-      validateInputArgs(args, logger)
 
       val topN = args(0).toInt
       val inputFile = s"${args(1)}/test.gz"
@@ -118,9 +119,8 @@ object App {
                    .csv(outputFile)
   }
 
-  private def validateInputArgs(args: Array[String],
-                                logger: Logger) = {
-    if (args.length != 3 || args.filter(_.nonEmpty).length != args.length) {
+  private def validateInputArgs(args: Array[String]) = {
+    if (args.length != 3 || args.count(_.nonEmpty) != args.length) {
       logger.error("The input arguments do NOT contain the expected values - topN ; output-directory; URL; please check and try again")
       System.exit(1)
     }
