@@ -1,26 +1,21 @@
 package com.learning.analyzer.processor
 
 import org.apache.spark.sql.SparkSession
-import org.scalatest.BeforeAndAfter
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 
-class TopNFrequentVisitorsPerDayGeneratorTest extends AnyFlatSpec with BeforeAndAfter{
+class TopNFrequentURLsPerDayGeneratorTest extends FlatSpec with BeforeAndAfter{
 
+
+  "TopNFrequentURLsPerDayGeneratorTest" should "return CORRECT values for count" in {
 
     val spark = SparkSession.builder
-                        .appName("TopNFrequentURLsPerDayGeneratorTest")
-                        .master("local[*]")
-                        .getOrCreate()
-
-
-  "TopNFrequentVisitorsPerDayGeneratorTest" should "return CORRECT values for count" in {
+                            .master("local")
+                            .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
-
-    val topN = 4
-
     import spark.implicits._
+    val topN = 4
 
     val inputDF = Seq(
       ("1995-07-05", "piweba3y.prodigy.com"),
@@ -28,30 +23,35 @@ class TopNFrequentVisitorsPerDayGeneratorTest extends AnyFlatSpec with BeforeAnd
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com")
-      ).toDF("date", "remoteHost")
+      ).toDF("date", "httpURL")
 
-    val topNFrequentURLsPerDay = new TopNFrequentVisitorsPerDayGenerator(spark, topN, inputDF).generate()
+    val topNFrequentURLsPerDay = new TopNFrequentURLsPerDayGenerator(topN, inputDF).generate()
 
 
-    assertResult(3, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")
-                                               .select("NumOfRecordsPerHost")
+    assertResult(3, "NumOfRecordsPerURL for date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-03\" AND httpURL=\"alyssa.prodigy.com\"")
+                                               .select("NumOfRecordsPerURL")
                                                .first().getLong(0))
 
-    assertResult(2, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")
-                                               .select("NumOfRecordsPerHost")
+    assertResult(2, "NumOfRecordsPerURL for date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-05\" AND httpURL=\"piweba3y.prodigy.com\"")
+                                               .select("NumOfRecordsPerURL")
                                                .first().getLong(0))
+
+    spark.stop()
 
   }
 
-  "TopNFrequentVisitorsPerDayGeneratorTest" should "return CORRECT values for rnk" in {
+  "TopNFrequentURLsPerDayGeneratorTest" should "return CORRECT values for rnk" in {
+
+    val spark = SparkSession.builder
+                            .master("local")
+                            .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
-
-    val topN = 4
-
     import spark.implicits._
+
+    val topN = 2
 
     val inputDF = Seq(
       ("1995-07-05", "piweba3y.prodigy.com"),
@@ -62,38 +62,32 @@ class TopNFrequentVisitorsPerDayGeneratorTest extends AnyFlatSpec with BeforeAnd
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-05", "alyssa.prodigy.com")
-      ).toDF("date", "remoteHost")
+      ).toDF("date", "httpURL")
 
-    val topNFrequentURLsPerDay = new TopNFrequentVisitorsPerDayGenerator(spark, topN, inputDF).generate()
+    val topNFrequentURLsPerDay = new TopNFrequentURLsPerDayGenerator(topN, inputDF).generate()
 
-
-    topNFrequentURLsPerDay.show()
-
-    assertResult(1, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")
+    assertResult(2, "Rank for date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-05\" AND httpURL=\"piweba3y.prodigy.com\"")
                                                .select("rnk")
                                                .first().getInt(0))
 
 
-    assertResult(2, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-05\" AND remoteHost=\"alyssa.prodigy.com\"")
+    assertResult(1, "Rank for date = \"1995-07-05\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-05\" AND httpURL=\"alyssa.prodigy.com\"")
                                                .select("rnk")
                                                .first().getInt(0))
 
-    assertResult(1, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")
+    assertResult(1, "Rank for date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-03\" AND httpURL=\"alyssa.prodigy.com\"")
                                                .select("rnk")
                                                .first().getInt(0))
 
-    assertResult(2, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-03\" AND remoteHost=\"piweba3y.prodigy.com\"")
+    assertResult(2, "Rank for date = \"1995-07-03\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-03\" AND httpURL=\"piweba3y.prodigy.com\"")
                                                .select("rnk")
                                                .first().getInt(0))
 
-  }
-
-
-  after {
     spark.stop()
   }
+
 }

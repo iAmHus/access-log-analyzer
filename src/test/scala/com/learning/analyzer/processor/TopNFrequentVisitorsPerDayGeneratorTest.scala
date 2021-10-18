@@ -1,51 +1,92 @@
 package com.learning.analyzer.processor
 
-import com.learning.analyzer.utils.DataFrameUtils
 import org.apache.spark.sql.SparkSession
-import org.scalatest.BeforeAndAfter
-import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.{BeforeAndAfter, FlatSpec}
 
 
-class TopNFrequentURLsPerDayGeneratorTest extends AnyFlatSpec with BeforeAndAfter{
+class TopNFrequentVisitorsPerDayGeneratorTest extends FlatSpec with BeforeAndAfter{
 
-  var spark:SparkSession = _
+  "TopNFrequentVisitorsPerDayGeneratorTest" should "return CORRECT values for count" in {
 
-  before {
-    spark = SparkSession.builder
-                        .appName("TopNFrequentURLsPerDayGeneratorTest")
-                        .master("local[*]")
-                        .getOrCreate()
-
-    import spark.implicits._
-
-  }
-
-  "TopNFrequentURLsPerDayGenerator" should "return valid counts" in {
+    val spark = SparkSession.builder
+                            .master("local")
+                            .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
+    import spark.implicits._
 
     val topN = 4
 
 
-    val inputDF = Seq(("1995-07-05", "piweba3y.prodigy.com"),
+    val inputDF = Seq(
+      ("1995-07-05", "piweba3y.prodigy.com"),
       ("1995-07-05", "piweba3y.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com"),
       ("1995-07-03", "alyssa.prodigy.com")
       ).toDF("date", "remoteHost")
 
-    val topNFrequentURLsPerDay = new TopNFrequentURLsPerDayGenerator(spark, topN, inputDF).generate()
+    val topNFrequentURLsPerDay = new TopNFrequentVisitorsPerDayGenerator(topN, inputDF).generate()
 
 
-    assertResult(3, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-03\"")
+    assertResult(3, "NumOfRecordsPerHost for date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")
                                                .select("NumOfRecordsPerHost")
                                                .first().getLong(0))
 
-    assertResult(2, "num of missing values")(topNFrequentURLsPerDay
-                                               .filter("date = \"1995-07-05\"")
+    assertResult(2, "NumOfRecordsPerHost for date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentURLsPerDay
+                                               .filter("date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")
                                                .select("NumOfRecordsPerHost")
                                                .first().getLong(0))
+    spark.stop()
+
+  }
+
+  "TopNFrequentVisitorsPerDayGeneratorTest" should "return CORRECT values for rnk" in {
+
+    val spark = SparkSession.builder
+                            .master("local")
+                            .getOrCreate()
+
+    spark.sparkContext.setLogLevel("ERROR")
+    import spark.implicits._
+    val topN = 4
+
+    val inputDF = Seq(
+      ("1995-07-05", "piweba3y.prodigy.com"),
+      ("1995-07-05", "piweba3y.prodigy.com"),
+      ("1995-07-05", "alyssa.prodigy.com"),
+      ("1995-07-05", "alyssa.prodigy.com"),
+      ("1995-07-03", "piweba3y.prodigy.com"),
+      ("1995-07-03", "alyssa.prodigy.com"),
+      ("1995-07-03", "alyssa.prodigy.com"),
+      ("1995-07-05", "alyssa.prodigy.com")
+      ).toDF("date", "remoteHost")
+
+    val topNFrequentVisitorsPerDay = new TopNFrequentVisitorsPerDayGenerator(topN, inputDF).generate()
+
+
+    assertResult(2, "Rank for date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentVisitorsPerDay
+                                               .filter("date = \"1995-07-05\" AND remoteHost=\"piweba3y.prodigy.com\"")
+                                               .select("rnk")
+                                               .first().getInt(0))
+
+
+    assertResult(1, "Rank for date = \"1995-07-05\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentVisitorsPerDay
+                                               .filter("date = \"1995-07-05\" AND remoteHost=\"alyssa.prodigy.com\"")
+                                               .select("rnk")
+                                               .first().getInt(0))
+
+    assertResult(1, "Rank for date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")(topNFrequentVisitorsPerDay
+                                               .filter("date = \"1995-07-03\" AND remoteHost=\"alyssa.prodigy.com\"")
+                                               .select("rnk")
+                                               .first().getInt(0))
+
+    assertResult(2, "Rank for date = \"1995-07-03\" AND remoteHost=\"piweba3y.prodigy.com\"")(topNFrequentVisitorsPerDay
+                                               .filter("date = \"1995-07-03\" AND remoteHost=\"piweba3y.prodigy.com\"")
+                                               .select("rnk")
+                                               .first().getInt(0))
+    spark.stop()
 
   }
 

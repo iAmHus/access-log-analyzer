@@ -15,10 +15,7 @@ libraryDependencies ++= Seq(
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.4.6"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6"
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.10"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.10" % "test"
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  )
 
-resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
-
-
-parallelExecution in Test := false

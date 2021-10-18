@@ -1,28 +1,47 @@
 package com.learning.analyzer.processor
 
+import org.apache.log4j.Logger
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, count, lit, rank}
-import org.apache.spark.sql.{DataFrame, SparkSession}
 
-class TopNFrequentVisitorsPerDayGenerator(val spark: SparkSession, val topN: Int, val cleanedDF: DataFrame) {
+class TopNFrequentVisitorsPerDayGenerator(val topN: Int, val cleanedDF: DataFrame) {
 
-  def generate():DataFrame ={
+  private val logger = Logger.getLogger("com.learning.analyzer.processor.TopNFrequentVisitorsPerDayGenerator")
+
+  def generate(): DataFrame = {
 
     //TODO: logging
-    //TODO: select only the columns interested in
-    //TODO: testing
+    logger.info("Process to determine the TopNFrequentVisitorsPerDay started")
 
-    val urlGroupedDF = cleanedDF.groupBy("date", "httpURL")
-                                .agg(count(lit(1)).alias("NumOfRecordsPerURL"))
+    val relevantDF = getRelevantData(cleanedDF)
+
+    val hostGroupedDF = relevantDF.groupBy("date", "remoteHost")
+                                  .agg(count(lit(1)).alias("NumOfRecordsPerHost"))
 
 
-    val specForRecordsPerURL = Window.partitionBy("date")
-                                     .orderBy(col("NumOfRecordsPerURL")
-                                                .desc)
+    val specForRecordsPerHost = Window.partitionBy("date")
+                                      .orderBy(col("NumOfRecordsPerHost")
+                                                 .desc)
 
-     urlGroupedDF.withColumn("rnk", rank().over(specForRecordsPerURL))
-                                             .where(s"rnk <= $topN")
-                                             .sort("date", "rnk")
+    val topNFrequentVisitorsPerDay = hostGroupedDF.withColumn("rnk", rank().over(specForRecordsPerHost))
+                                                  .where(s"rnk <= $topN")
+                                                  .sort("date", "rnk")
+
+    logger.info("Process to determine the TopNFrequentVisitorsPerDay completed")
+
+    topNFrequentVisitorsPerDay
+  }
+
+  private def getRelevantData(inputDF: DataFrame): DataFrame = {
+
+    val relevantDF = inputDF.select("date", "remoteHost")
+                            .filter("remoteHost is not null")
+
+    logger.info("Selected the relevant columns to find the TopNFrequentVisitorsPerDay")
+
+    relevantDF
 
   }
+
 }

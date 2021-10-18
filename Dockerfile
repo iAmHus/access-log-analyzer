@@ -9,7 +9,7 @@ RUN wget "https://archive.apache.org/dist/spark/spark-2.4.6/spark-2.4.6-bin-hado
 RUN tar -xzvf spark-2.4.6-bin-hadoop2.7.tgz
 RUN rm spark-2.4.6-bin-hadoop2.7.tgz
 
-#LABEL image=test.gz-spark
+#LABEL image=test-spark
 
 COPY target/scala-2.11/access-log-analyzer_2.11-1.0.0.jar /opt/application/
 
