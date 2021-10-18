@@ -11,7 +11,6 @@ class TopNFrequentVisitorsPerDayGenerator(val topN: Int, val cleanedDF: DataFram
 
   def generate(): DataFrame = {
 
-    //TODO: logging
     logger.info("Process to determine the TopNFrequentVisitorsPerDay started")
 
     val relevantDF = getRelevantData(cleanedDF)

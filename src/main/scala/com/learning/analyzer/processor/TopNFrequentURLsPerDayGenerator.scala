@@ -14,7 +14,6 @@ class TopNFrequentURLsPerDayGenerator(val topN: Int, val cleanedDF: DataFrame) {
 
     logger.info("Process to determine the TopNFrequentURLsPerDay started")
 
-
     val relevantDF = getRelevantData(cleanedDF)
 
     val urlGroupedDF = relevantDF.groupBy("date", "httpURL")
