@@ -90,4 +90,31 @@ class TopNFrequentVisitorsPerDayGeneratorTest extends FlatSpec with BeforeAndAft
 
   }
 
+
+  "TopNFrequentVisitorsPerDayGeneratorTest" should "ignore rows that have NULL column for httpURL" in {
+
+    val spark = SparkSession.builder
+                            .master("local")
+                            .getOrCreate()
+
+    spark.sparkContext.setLogLevel("ERROR")
+    import spark.implicits._
+
+    val topN = 2
+
+    val inputDF = Seq(
+      ("1995-07-05", null),
+      ("1995-07-05", null),
+
+      ("1995-07-03", "alyssa.prodigy.com"),
+      ("1995-07-03", "alyssa.prodigy.com")
+      ).toDF("date", "remoteHost")
+
+    val topNFrequentVisitorsPerDay = new TopNFrequentVisitorsPerDayGenerator(topN, inputDF).generate()
+
+    assertResult(0, "Should ignore rows where remoteHost is null ")(topNFrequentVisitorsPerDay
+                                                                                                .filter("date = \"1995-07-05\"")
+                                                                                                .count())
+
+  }
 }

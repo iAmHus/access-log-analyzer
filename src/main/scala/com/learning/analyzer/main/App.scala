@@ -76,6 +76,13 @@ object App {
 
   }
 
+  /**
+   * Used to get the input file from the input location passed
+   * In case it is not retrieved, the program goes to a backup location
+   *
+   * @param inputFile - Location to write input file to
+   * @param fileUrl - Input file URL passed to the program
+   */
   private def saveInputFile(inputFile: String, fileUrl: String): Unit = {
     try {
       if (Files.notExists(Paths.get(inputFile))) {
@@ -93,6 +100,13 @@ object App {
     }
   }
 
+  /**
+   * Used to get the input file from the backup location.
+   * In case it is not retrieved, the program fails with an error
+   *
+   * @param inputFile - Location to write input file to
+   * @param fileUrl - Back up file location
+   */
   private def getInputFileFromBackupLocation(inputFile: String, fileUrl: String): Unit = {
 
     try {
@@ -109,6 +123,12 @@ object App {
     }
   }
 
+  /**
+   * Used to write a DataFrame to the output file specified
+   *
+   * @param outputFile - Output file to write to
+   * @param outputDataFrame - Dataframe to write
+   */
   private def writeToDisk(outputFile: String,
                           outputDataFrame: DataFrame) = {
     outputDataFrame.coalesce(1)
@@ -119,6 +139,11 @@ object App {
                    .csv(outputFile)
   }
 
+  /**
+   * Used to validate that the expected number of arguments are passed to the program and none of them are valid
+   *
+   * @param args - Input arguments passed to the spark program
+   */
   private def validateInputArgs(args: Array[String]) = {
     if (args.length != 3 || args.count(_.nonEmpty) != args.length) {
       logger.error("The input arguments do NOT contain the expected values - topN ; output-directory; URL; please check and try again")
