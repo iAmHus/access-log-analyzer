@@ -15,6 +15,10 @@ This project is a program in Scala/Spark packaged into a docker container that -
 - Run the script using the 'sh deploy.sh'
   
 ```
+# Navigate to the folder you are willing to pull the project into and create a test dir
+
+mkdir test 
+
 git clone https://github.com/iAmHus/access-log-analyzer
 
 cd access-log-analyzer/deployment-scripts
@@ -25,11 +29,11 @@ chmod 755 deploy.sh
 # Specifying 3, as we do here, gets the top3 most frequent URLs and the top 3 most frequent visitors
 
 
-# ** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS NOT TOO RELIABLE, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE ****
+# ** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS NOT TOO RELIABLE, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE **
 
 sh deploy.sh -n 3 
 
-# Wait for the process to complete and for the shell to return
+# Wait for the process to complete and for the shell prompt to return
 
 ```
 
