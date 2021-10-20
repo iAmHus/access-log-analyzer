@@ -1,6 +1,5 @@
 package com.learning.analyzer.main
 
-import com.learning.analyzer.global.Constants
 import com.learning.analyzer.preprocessor.Preprocessor
 import com.learning.analyzer.processor.{TopNFrequentURLsPerDayGenerator, TopNFrequentVisitorsPerDayGenerator}
 import org.apache.log4j.Logger
@@ -34,16 +33,15 @@ object App {
       spark.get.sqlContext.setConf("spark.sql.files.ignoreCorruptFiles", "true")
       spark.get.sparkContext.setLogLevel("ERROR")
 
-      logger.info("Started and created a spark session")
-
+      logger.info("Created and started a spark session")
 
       val topN = args(0).toInt
       val inputFile = s"${args(1)}/test.gz"
       val outputFileDir = s"${args(1)}/output"
       val fileUrl = args(2)
+      val backupUrl = args(3)
 
-      saveInputFile(inputFile, fileUrl)
-
+      saveInputFile(inputFile, fileUrl, backupUrl)
 
       val cleanedDF = new Preprocessor(spark.get, inputFile).preprocess()
 
@@ -69,6 +67,7 @@ object App {
     } catch {
       case e: Exception => {
         logger.error(s"${e.getMessage} occurred while processing the logs and the trace is - ${e.printStackTrace()}")
+        throw e
       }
     } finally {
       if (spark.isDefined) spark.get.stop()
@@ -83,19 +82,19 @@ object App {
    * @param inputFile - Location to write input file to
    * @param fileUrl - Input file URL passed to the program
    */
-  private def saveInputFile(inputFile: String, fileUrl: String): Unit = {
+  private def saveInputFile(inputFile: String, fileUrl: String, backupURL: String): Unit = {
     try {
       if (Files.notExists(Paths.get(inputFile))) {
         new URL(fileUrl) #> new File(inputFile) !!
       }
-      logger.info("Saving the file from the input location completed")
+      logger.info(s"Saving the file from the input URL to $inputFile completed")
     } catch {
       case _: Exception => {
-        logger.error(s"Can't download the file from the location in the startup args : $fileUrl, " +
-                       s"trying the backup location - ${Constants.BackupInputURL}")
+        logger.error(s"Can't download the file from the input location  : $fileUrl, " +
+                       s"trying the backup location - ${backupURL} [THE APP IS STILL RUNNING ...]")
         Files.deleteIfExists(Paths.get(inputFile))
         getInputFileFromBackupLocation(inputFile,
-                                       Constants.BackupInputURL)
+                                       backupURL)
       }
     }
   }
@@ -113,12 +112,12 @@ object App {
       if (Files.notExists(Paths.get(inputFile))) {
         new URL(fileUrl) #> new File(inputFile) !!
       }
-      logger.info("Saving the file from the backup location completed")
+      logger.info(s"Saving the file from the backup location $inputFile completed")
 
     } catch {
       case _: Exception => {
         logger.error(s"Can't download the file from the back-up location : $fileUrl, shutting down now !")
-        System.exit(1)
+        throw new RuntimeException("Can't download the file from both the input and the back-up locations")
       }
     }
   }
@@ -145,9 +144,9 @@ object App {
    * @param args - Input arguments passed to the spark program
    */
   private def validateInputArgs(args: Array[String]) = {
-    if (args.length != 3 || args.count(_.nonEmpty) != args.length) {
-      logger.error("The input arguments do NOT contain the expected values - topN ; output-directory; URL; please check and try again")
-      System.exit(1)
+    if (args.length != 4 || args.count(_.nonEmpty) != args.length) {
+      logger.error("The input arguments do NOT contain the expected values - topN ; output-directory; input URL; backup URL; please check and try again")
+      throw new RuntimeException("The input arguments do NOT contain the expected values - topN ; output-directory; input URL; backup URL; please check and try again")
     }
   }
 }

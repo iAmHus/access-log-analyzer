@@ -12,13 +12,44 @@ This project is a program in Scala/Spark packaged into a docker container that -
 ###### <b>PRE-REQUISITES: Have GIT, Docker and Scala Build Tool [https://www.scala-sbt.org/download.html] (SBT) installed</b>
 - Git clone the project from here - https://github.com/iAmHus/access-log-analyzer
 - Navigate to the deployment-scripts directory
-- Run the script using the 'sh deploy.sh', which runs the spark-submit command in the docker container
-- And the last line in Dockerfile is a 'spark-submit' command that takes 3 arguments :
-    - topN records - to be determined
-    - path to write the output files in the container
-    - File location the projects downloads the input from
+- Run the script using the 'sh deploy.sh'
+  
+```
+git clone https://github.com/iAmHus/access-log-analyzer
+
+cd access-log-analyzer/deployment-scripts
+
+# Run the deployment script, with an argument specifying how many 'topN' values you would want to see
+# Specifying 3, as we do here, gets the top3 most frequent URLs and the top 3 most frequent visitors
+
+sh deploy.sh -n 3 
+
+# Wait for the process to complete and for the shell to return
+# **** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS FINICKY, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE ****
+
+```
+
+The shell script kicks off a series of commands, the last of which runs a docker file containing the spark-submit command, that takes 3 arguments :
+- topN records - to be determined
+- path to write the output files in the container
+- URL the project downloads the data from
+- Back-up URL the projects falls back to download the input
 
 ### Verifying the output
+
+Once the steps above complete successfully and the shell prompt returns, verify the output by doing the following - 
+
+```
+
+cd ../access-log-analyzer-data/output
+
+ls
+
+# you should see two folders - topNFrequentVisitorsPerDay and topNFrequentURLsPerDay
+
+# Move into those folders, and you should have the CSV files carrying the data
+```
+
 - The project uses volumes - to map the output directory in the container to the host machine
 - After the project runs successfully; there should be a folder in the home directory of the project i.e. one level above deployment-scripts directory called "access-log-analyzer-data"
 - It should be having two folders in it  - "access-log-analyzer-data/output" containing the csv files corresponding to topNFrequentURLsPerDay AND topNFrequentVisitorsPerDay respectively
