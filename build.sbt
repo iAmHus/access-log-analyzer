@@ -14,8 +14,10 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "org.apache.spark" %% "spark-core" % "2.4.6"
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6"
+libraryDependencies += "com.github.mrpowers" %% "spark-fast-tests" % "0.23.0"
 
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.0.8" % Test,
+  "com.github.mrpowers" %% "spark-fast-tests" % "0.23.0" % Test
   )
 

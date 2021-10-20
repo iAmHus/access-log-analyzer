@@ -4,7 +4,7 @@ import org.scalatest.FlatSpec
 
 class AppTest extends FlatSpec {
 
-  "AppTest" should "throw an exception when the arguments passed are less than expected (in this case 4)" in {
+  "App" should "throw an exception when the arguments passed are less than expected (in this case 4)" in {
 
     val exceptionWhenZeroExpctedValuesPassed = intercept[RuntimeException] {
       App.main(Array[String]())
@@ -37,10 +37,10 @@ class AppTest extends FlatSpec {
   }
 
 
-  "AppTest" should "throw an exception when the input URL and the back up URL both don't yield a valid file" in {
+  "App" should "throw an exception when the input URL and the back up URL both do NOT work" in {
 
     val exceptionWhenThreeExpctedValuesPassed = intercept[RuntimeException] {
-      App.main(Array[String]("1", "/tmp", "http://bla.bla", "http://bla.bla"))
+      App.main(Array[String]("1", "/bad_path_bad_path", "ftp://bla.bla", "ftp://bla.bla"))
     }
 
     assert(exceptionWhenThreeExpctedValuesPassed.getMessage() == "Can't download the file from both the input and the back-up locations")

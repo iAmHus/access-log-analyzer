@@ -1,7 +1,7 @@
 package com.learning.analyzer.preprocessor
 
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{DataFrame, SparkSession}
-import org.apache.spark.sql.functions.{col, regexp_extract, split, to_date, trim}
 
 /**
  *  This class hosts the logic to pre-process the input data i.e. filtering, and extracting the fields we are interested in etc.
@@ -23,35 +23,26 @@ class Preprocessor(val spark: SparkSession, val inputFile: String)  {
     .stripMargin)
     .text(inputFile)
 
-    val splitDF: DataFrame = extractColumnsFromRegex(rawDF)
+    ignoreMissingDateCols(extractColumnsFromRegex(rawDF))
 
-    val intermediateDF = splitDF.withColumn("httpRequestSplit", split(col("httpRequest"), "\\s"))
-                                .withColumn("logNameRemoteUserSplit", split(col("logNameRemoteUser"), "\\s"))
-                                .withColumn("httpMethod", col("httpRequestSplit").getItem(0))
-                                .withColumn("httpURL", col("httpRequestSplit").getItem(1))
-                                .withColumn("httpVersion", col("httpRequestSplit").getItem(2))
-                                .withColumn("logName", col("logNameRemoteUserSplit").getItem(0))
-                                .withColumn("remoteUser", col("logNameRemoteUserSplit").getItem(1))
 
-                                .withColumn("date", to_date(col("timeStampCol"), "dd/MMM/yyyy:HH:mm:ss Z"))
+  }
 
+  def ignoreMissingDateCols(intermediateDF: DataFrame) = {
     val cleanedDF = intermediateDF.select("remoteHost", "logName", "remoteUser",
-                                          "date", "httpMethod", "httpURL" , "httpVersion", "httpStatusCode",
-                                          "responseBytesCaptured" )
+                                          "date", "httpMethod", "httpURL", "httpVersion", "httpStatusCode",
+                                          "responseBytesCaptured")
                                   .filter("date is not null")
-
     cleanedDF
-
   }
 
   /**
    * Used to get columns by using regex matches
    *
    * @param rawDF - Input DataFrame to extract columns from
-   *
    * @return - DataFrame with columns extracted
    */
-  private def extractColumnsFromRegex(rawDF: DataFrame) = {
+  def extractColumnsFromRegex(rawDF: DataFrame) = {
     val REMOTE_HOST_REGEX = "(^\\S+[\\S+\\.]{2,4}\\S+)"
     val HTTP_REQUEST_REGEX = "(?<=\\\").+?(?=\\\")"
     val TIMESTAMP_REGEX = "(?<=\\[).+?(?=\\])"
@@ -73,6 +64,16 @@ class Preprocessor(val spark: SparkSession, val inputFile: String)  {
       trim(regexp_extract(col("raw_data"), RESPONSE_BYTES_CAPTURED_REGEX, 0))
         .alias("responseBytesCaptured")
       )
-    splitDF
+
+
+    splitDF.withColumn("httpRequestSplit", split(col("httpRequest"), "\\s"))
+                                .withColumn("logNameRemoteUserSplit", split(col("logNameRemoteUser"), "\\s"))
+                                .withColumn("httpMethod", col("httpRequestSplit").getItem(0))
+                                .withColumn("httpURL", col("httpRequestSplit").getItem(1))
+                                .withColumn("httpVersion", col("httpRequestSplit").getItem(2))
+                                .withColumn("logName", col("logNameRemoteUserSplit").getItem(0))
+                                .withColumn("remoteUser", col("logNameRemoteUserSplit").getItem(1))
+
+                                .withColumn("date", to_date(col("timeStampCol"), "dd/MMM/yyyy:HH:mm:ss Z"))
   }
 }

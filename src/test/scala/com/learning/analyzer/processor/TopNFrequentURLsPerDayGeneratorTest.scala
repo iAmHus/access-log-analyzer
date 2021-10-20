@@ -11,6 +11,7 @@ class TopNFrequentURLsPerDayGeneratorTest extends FlatSpec with BeforeAndAfter {
 
     val spark = SparkSession.builder
                             .master("local")
+                            .config("spark.sql.shuffle.partitions", "1")
                             .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
@@ -46,6 +47,8 @@ class TopNFrequentURLsPerDayGeneratorTest extends FlatSpec with BeforeAndAfter {
 
     val spark = SparkSession.builder
                             .master("local")
+                            .config("spark.sql.shuffle.partitions", "1")
+
                             .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")
@@ -95,6 +98,8 @@ class TopNFrequentURLsPerDayGeneratorTest extends FlatSpec with BeforeAndAfter {
 
     val spark = SparkSession.builder
                             .master("local")
+                            .config("spark.sql.shuffle.partitions", "1")
+
                             .getOrCreate()
 
     spark.sparkContext.setLogLevel("ERROR")

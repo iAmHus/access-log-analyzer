@@ -15,9 +15,10 @@ This project is a program in Scala/Spark packaged into a docker container that -
 - Run the script using the 'sh deploy.sh'
   
 ```
-# Navigate to the folder you are willing to pull the project into and create a test dir
+# Create and navigate a test dir to pull the project and run it in
 
 mkdir test 
+cd test
 
 git clone https://github.com/iAmHus/access-log-analyzer
 
@@ -31,13 +32,16 @@ chmod 755 deploy.sh
 
 # ** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS NOT TOO RELIABLE, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE **
 
-sh deploy.sh -n 3 
+sh deploy.sh -n 3
+
+#If you don't have SBT installed, you can use 
+sh deploy-without-build.sh -n 3
 
 # Wait for the process to complete and for the shell prompt to return
 
 ```
 
-The shell script kicks off a series of commands, the last of which runs a docker file containing the spark-submit command, that takes 3 arguments :
+The shell script kicks off a series of commands, the last of which runs a docker file containing the spark-submit command, that takes 4 arguments :
 - topN records - to be determined
 - path to write the output files in the container
 - URL the project downloads the data from
