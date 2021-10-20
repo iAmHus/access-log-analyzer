@@ -9,7 +9,7 @@ This project is a program in Scala/Spark packaged into a docker container that -
 
 ### Running the project
 
-###### <b>PRE-REQUISITES: Have GIT, Docker and Scala Build Tool [https://www.scala-sbt.org/download.html] (SBT) installed</b>
+###### <b>PRE-REQUISITES: Have GIT, Docker, Scala 2.11 and Scala Build Tool [https://www.scala-sbt.org/download.html] (SBT) installed</b>
 - Git clone the project from here - https://github.com/iAmHus/access-log-analyzer
 - Navigate to the deployment-scripts directory
 - Run the script using the 'sh deploy.sh'
@@ -19,13 +19,17 @@ git clone https://github.com/iAmHus/access-log-analyzer
 
 cd access-log-analyzer/deployment-scripts
 
+chmod 755 deploy.sh
+
 # Run the deployment script, with an argument specifying how many 'topN' values you would want to see
 # Specifying 3, as we do here, gets the top3 most frequent URLs and the top 3 most frequent visitors
+
+
+# ** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS NOT TOO RELIABLE, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE ****
 
 sh deploy.sh -n 3 
 
 # Wait for the process to complete and for the shell to return
-# **** PLEASE DON'T BE PUT OFF IF YOU SEE A FEW ERRORS ON THE SCREEN, THE FTP URL IS FINICKY, SO THERE IS A BACKUP URL PASSED TO THE APP, SEE THE "NOTE" AT THE END OF THE README FILE ****
 
 ```
 
@@ -47,7 +51,7 @@ ls
 
 # you should see two folders - topNFrequentVisitorsPerDay and topNFrequentURLsPerDay
 
-# Move into those folders, and you should have the CSV files carrying the data
+# 'cd' into those folders, and you have the CSV files with the output data
 ```
 
 - The project uses volumes - to map the output directory in the container to the host machine
@@ -55,4 +59,4 @@ ls
 - It should be having two folders in it  - "access-log-analyzer-data/output" containing the csv files corresponding to topNFrequentURLsPerDay AND topNFrequentVisitorsPerDay respectively
 
 <b>Note:</b> 
-- The original file location (FTP server) - ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz  has not been too reliable, working on some occasions but not on the other, so created a backup web location here, which the project uses - https://github.com/iAmHus/datasets/blob/main/NASA_access_log_Jul95.gz?raw=true
+- The original file location (FTP server) - ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz  has not been too reliable, working on some occasions but not on the other, so created a backup location here, hosting the same file - https://github.com/iAmHus/datasets/blob/main/NASA_access_log_Jul95.gz?raw=true
