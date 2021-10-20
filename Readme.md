@@ -34,8 +34,8 @@ chmod 755 deploy.sh
 
 sh deploy.sh -n 3
 
-#If you don't have SBT installed, you can use 
-sh deploy-without-build.sh -n 3
+# If you don't have SBT installed, you can use the following - (have't tested this, but its a simple enough change from the former script; should work) - let me know if it doesn't
+# sh deploy-without-build.sh -n 3
 
 # Wait for the process to complete and for the shell prompt to return
 
@@ -65,6 +65,17 @@ ls
 - The project uses volumes - to map the output directory in the container to the host machine
 - After the project runs successfully; there should be a folder in the home directory of the project i.e. one level above deployment-scripts directory called "access-log-analyzer-data"
 - It should be having two folders in it  - "access-log-analyzer-data/output" containing the csv files corresponding to topNFrequentURLsPerDay AND topNFrequentVisitorsPerDay respectively
+
+### Clean up
+
+To remove the files and all such generated; do the following - 
+
+```
+cd ../../../../
+
+rm -rf test
+
+```
 
 <b>Note:</b> 
 - The original file location (FTP server) - ftp://ita.ee.lbl.gov/traces/NASA_access_log_Jul95.gz  has not been too reliable, working on some occasions but not on the other, so created a backup location here, hosting the same file - https://github.com/iAmHus/datasets/blob/main/NASA_access_log_Jul95.gz?raw=true
